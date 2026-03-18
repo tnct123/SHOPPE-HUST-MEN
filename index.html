@@ -104,10 +104,13 @@ Vui lòng chờ trong giây lát...
 <div class="progress">
 <div class="progress-bar"></div>
 </div>
+</div>
+
+<!-- FIREBASE TRACKING -->
 <script type="module">
-  
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, push, runTransaction, onValue }
+import { getDatabase, ref, push, runTransaction }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
@@ -123,65 +126,40 @@ appId: "1:1097366065563:web:cd629b7a98138506ab113e"
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// lưu lịch sử truy cập
-push(ref(db,"luot_truy_cap"),{
-time: new Date().toLocaleString(),
-device: navigator.userAgent,
-link: window.location.href
-});
-
-// tăng bộ đếm tổng
-const counterRef = ref(db,"tong_truy_cap");
-
-runTransaction(counterRef,(value)=>{
-return (value || 0) + 1;
-});
-
-// hiển thị realtime
-onValue(counterRef,(snap)=>{
-document.getElementById("soNguoi").innerText = snap.val() || 0;
-});
-
-// redirect sau 20s
-setTimeout(()=>{
-window.location.href="https://vn.shp.ee/TuGyf3Ro";
-},20000);
-</div>
-
-<script>
-
-// ===== LẤY NGUỒN TRUY CẬP =====
+// nguồn truy cập
 let source = new URLSearchParams(window.location.search).get("utm_source") || "direct";
 
-gtag('event','traffic_source',{
-event_category:'source',
-event_label: source
-});
-
-// ===== TRACK THIẾT BỊ =====
-gtag('event','device_info',{
-event_category:'device',
-event_label:navigator.userAgent
-});
-
-// ===== LẤY IP + QUỐC GIA =====
+// lấy IP
 fetch("https://ipapi.co/json/")
 .then(res=>res.json())
 .then(data=>{
 
-gtag('event','user_location',{
-event_category:'location',
-event_label:data.ip + " | " + data.country_name
+push(ref(db,"logs"),{
+time: new Date().toLocaleString(),
+ip: data.ip,
+country: data.country_name,
+device: navigator.userAgent,
+source: source,
+link: window.location.href
 });
 
-// ===== GỬI VỀ GOOGLE SHEET =====
+// gửi Google Sheet
 fetch("https://script.google.com/macros/s/AKfycbyoOJ_3R40UEWpRzWbRT4a7vgk7I0RRDjV4dQjg_txo4EMiU9mauapwxhq98aIvKrTdDA/exec?ip="+data.ip+
 "&device="+navigator.userAgent+
 "&source="+source);
 
 });
 
-// ===== TRACK THỜI GIAN Ở LẠI =====
+// tăng tổng truy cập
+runTransaction(ref(db,"counter"),(value)=>{
+return (value || 0) + 1;
+});
+
+</script>
+
+<script>
+
+// tracking thời gian ở lại
 let startTime = Date.now();
 
 window.addEventListener("beforeunload", function () {
@@ -196,7 +174,7 @@ value: stayTime
 
 });
 
-// ===== REDIRECT SAU 20s =====
+// redirect sau 20s
 setTimeout(()=>{
 
 gtag('event','redirect_shopee',{
