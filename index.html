@@ -106,7 +106,6 @@ Vui lòng chờ trong giây lát...
 </div>
 </div>
 
-<!-- FIREBASE TRACKING -->
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -129,35 +128,33 @@ const db = getDatabase(app);
 // nguồn truy cập
 let source = new URLSearchParams(window.location.search).get("utm_source") || "direct";
 
-// lấy IP
-fetch("https://ipapi.co/json/")
+// lấy IP ổn định
+fetch("https://api.ipify.org?format=json")
 .then(res=>res.json())
-.then(data=>{
+.then(ipData=>{
 
+let ip = ipData.ip;
+
+// ghi firebase
 push(ref(db,"logs"),{
 time: new Date().toLocaleString(),
-ip: data.ip,
-country: data.country_name,
+ip: ip,
 device: navigator.userAgent,
 source: source,
 link: window.location.href
 });
 
-// gửi Google Sheet
-fetch("https://script.google.com/macros/s/AKfycbyoOJ_3R40UEWpRzWbRT4a7vgk7I0RRDjV4dQjg_txo4EMiU9mauapwxhq98aIvKrTdDA/exec?ip="+data.ip+
-"&device="+navigator.userAgent+
-"&source="+source);
-
-});
-
-// tăng tổng truy cập
+// tăng counter
 runTransaction(ref(db,"counter"),(value)=>{
 return (value || 0) + 1;
 });
 
-</script>
+// gửi google sheet
+fetch("https://script.google.com/macros/s/AKfycbyoOJ_3R40UEWpRzWbRT4a7vgk7I0RRDjV4dQjg_txo4EMiU9mauapwxhq98aIvKrTdDA/exec?ip="+ip+
+"&device="+navigator.userAgent+
+"&source="+source);
 
-<script>
+});
 
 // tracking thời gian ở lại
 let startTime = Date.now();
@@ -174,7 +171,11 @@ value: stayTime
 
 });
 
-// redirect sau 20s
+</script>
+
+<script>
+
+// redirect sau 10 giây
 setTimeout(()=>{
 
 gtag('event','redirect_shopee',{
