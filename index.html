@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="vi">
 <head>
 
@@ -7,7 +6,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>HUST MEN</title>
-<meta property="og:title" content="HUST MEN gửi món quà nho nhỏ tặng bạn đây ❤️">
+
+<meta property="og:title" content="HUST MEN gửi món quà nho nhỏ tặng bạn đây">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://tnct123.github.io/SHOPPE-HUST-MEN/">
 <meta property="og:image" content="https://tnct123.github.io/SHOPPE-HUST-MEN/logo.png">
@@ -15,7 +15,6 @@
 <link rel="icon" href="logo.png">
 
 <style>
-
 body{
 font-family:'Segoe UI', Arial, sans-serif;
 background: linear-gradient(135deg,#ffcc99,#ffffff);
@@ -24,6 +23,40 @@ justify-content:center;
 align-items:center;
 height:100vh;
 margin:0;
+overflow:hidden;
+position:relative;
+}
+
+body::before{
+content:"";
+position:absolute;
+width:400px;
+height:400px;
+background:radial-gradient(circle,#ff9800aa,transparent 70%);
+top:-100px;
+left:-100px;
+animation:float1 8s ease-in-out infinite alternate;
+}
+
+body::after{
+content:"";
+position:absolute;
+width:350px;
+height:350px;
+background:radial-gradient(circle,#ff5722aa,transparent 70%);
+bottom:-120px;
+right:-120px;
+animation:float2 10s ease-in-out infinite alternate;
+}
+
+@keyframes float1{
+from{transform:translateY(0px);}
+to{transform:translateY(40px);}
+}
+
+@keyframes float2{
+from{transform:translateY(0px);}
+to{transform:translateY(-40px);}
 }
 
 .container{
@@ -78,18 +111,13 @@ from{width:0%;}
 to{width:100%;}
 }
 
+.count{
+margin-top:15px;
+font-size:18px;
+color:#ff5722;
+font-weight:bold;
+}
 </style>
-
-<script>
-
-const linkChuyenHuong="https://vn.shp.ee/TuGyf3Ro";
-const thoiGianCho=20000;
-
-setTimeout(function(){
-window.location.href=linkChuyenHuong;
-},thoiGianCho);
-
-</script>
 
 </head>
 
@@ -97,11 +125,9 @@ window.location.href=linkChuyenHuong;
 
 <div class="container">
 
-<img src="logo.png" class="logo" alt="HUST-MEN Logo">
+<img src="logo.png" class="logo">
 
-<div class="title">
-HUST-MEN
-</div>
+<div class="title">HUST-MEN</div>
 
 <div class="message">
 Hệ thống đang chuẩn bị mã giảm giá cho bạn.<br>
@@ -112,10 +138,53 @@ Vui lòng chờ trong giây lát...
 <div class="progress-bar"></div>
 </div>
 
+
 </div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, push, runTransaction, onValue }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyBpThQgsy6FoGMFALL1mMdCDrupeqwD_c8",
+authDomain: "hust-man.firebaseapp.com",
+databaseURL: "https://hust-man-default-rtdb.asia-southeast1.firebasedatabase.app",
+projectId: "hust-man",
+storageBucket: "hust-man.firebasestorage.app",
+messagingSenderId: "1097366065563",
+appId: "1:1097366065563:web:cd629b7a98138506ab113e"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// lưu lịch sử truy cập
+push(ref(db,"luot_truy_cap"),{
+time: new Date().toLocaleString(),
+device: navigator.userAgent,
+link: window.location.href
+});
+
+// tăng bộ đếm tổng
+const counterRef = ref(db,"tong_truy_cap");
+
+runTransaction(counterRef,(value)=>{
+return (value || 0) + 1;
+});
+
+// hiển thị realtime
+onValue(counterRef,(snap)=>{
+document.getElementById("soNguoi").innerText = snap.val() || 0;
+});
+
+// redirect sau 20s
+setTimeout(()=>{
+window.location.href="https://vn.shp.ee/TuGyf3Ro";
+},20000);
+
+</script>
 
 </body>
 </html>
-
-
-
