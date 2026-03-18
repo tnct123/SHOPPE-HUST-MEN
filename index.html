@@ -15,15 +15,12 @@
 <link rel="icon" href="logo.png">
 
 <!-- GOOGLE ANALYTICS -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-ABC1234567"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-12WDG85B8M"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
-
-// track vào trang
 gtag('config', 'G-12WDG85B8M');
-
 </script>
 
 <style>
@@ -36,7 +33,6 @@ align-items:center;
 height:100vh;
 margin:0;
 overflow:hidden;
-position:relative;
 }
 
 .container{
@@ -97,9 +93,7 @@ to{width:100%;}
 <body>
 
 <div class="container">
-
 <img src="logo.png" class="logo">
-
 <div class="title">HUST MEN</div>
 
 <div class="message">
@@ -110,12 +104,57 @@ Vui lòng chờ trong giây lát...
 <div class="progress">
 <div class="progress-bar"></div>
 </div>
-
 </div>
 
 <script>
 
-// sau 20s → track redirect rồi chuyển link
+// ===== LẤY NGUỒN TRUY CẬP =====
+let source = new URLSearchParams(window.location.search).get("utm_source") || "direct";
+
+gtag('event','traffic_source',{
+event_category:'source',
+event_label: source
+});
+
+// ===== TRACK THIẾT BỊ =====
+gtag('event','device_info',{
+event_category:'device',
+event_label:navigator.userAgent
+});
+
+// ===== LẤY IP + QUỐC GIA =====
+fetch("https://ipapi.co/json/")
+.then(res=>res.json())
+.then(data=>{
+
+gtag('event','user_location',{
+event_category:'location',
+event_label:data.ip + " | " + data.country_name
+});
+
+// ===== GỬI VỀ GOOGLE SHEET =====
+fetch("SCRIPT_GOOGLE_SHEET_URL?ip="+data.ip+
+"&device="+navigator.userAgent+
+"&source="+source);
+
+});
+
+// ===== TRACK THỜI GIAN Ở LẠI =====
+let startTime = Date.now();
+
+window.addEventListener("beforeunload", function () {
+
+let stayTime = Math.round((Date.now() - startTime)/1000);
+
+gtag('event','time_on_page',{
+event_category:'engagement',
+event_label:'stay_time',
+value: stayTime
+});
+
+});
+
+// ===== REDIRECT SAU 20s =====
 setTimeout(()=>{
 
 gtag('event','redirect_shopee',{
