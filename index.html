@@ -133,7 +133,7 @@ event_label:data.ip + " | " + data.country_name
 });
 
 // ===== GỬI VỀ GOOGLE SHEET =====
-fetch("SCRIPT_GOOGLE_SHEET_URL?ip="+data.ip+
+fetch("https://script.google.com/macros/s/AKfycbyoOJ_3R40UEWpRzWbRT4a7vgk7I0RRDjV4dQjg_txo4EMiU9mauapwxhq98aIvKrTdDA/exec?ip="+data.ip+
 "&device="+navigator.userAgent+
 "&source="+source);
 
