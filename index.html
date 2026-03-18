@@ -104,6 +104,48 @@ Vui lòng chờ trong giây lát...
 <div class="progress">
 <div class="progress-bar"></div>
 </div>
+<script type="module">
+  
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, push, runTransaction, onValue }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyBpThQgsy6FoGMFALL1mMdCDrupeqwD_c8",
+authDomain: "hust-man.firebaseapp.com",
+databaseURL: "https://hust-man-default-rtdb.asia-southeast1.firebasedatabase.app",
+projectId: "hust-man",
+storageBucket: "hust-man.firebasestorage.app",
+messagingSenderId: "1097366065563",
+appId: "1:1097366065563:web:cd629b7a98138506ab113e"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// lưu lịch sử truy cập
+push(ref(db,"luot_truy_cap"),{
+time: new Date().toLocaleString(),
+device: navigator.userAgent,
+link: window.location.href
+});
+
+// tăng bộ đếm tổng
+const counterRef = ref(db,"tong_truy_cap");
+
+runTransaction(counterRef,(value)=>{
+return (value || 0) + 1;
+});
+
+// hiển thị realtime
+onValue(counterRef,(snap)=>{
+document.getElementById("soNguoi").innerText = snap.val() || 0;
+});
+
+// redirect sau 20s
+setTimeout(()=>{
+window.location.href="https://vn.shp.ee/TuGyf3Ro";
+},20000);
 </div>
 
 <script>
@@ -165,50 +207,7 @@ event_label:'user_redirect'
 window.location.href="https://vn.shp.ee/TuGyf3Ro";
 
 },20000);
-  
-<script type="module">
-  
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, push, runTransaction, onValue }
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-const firebaseConfig = {
-apiKey: "AIzaSyBpThQgsy6FoGMFALL1mMdCDrupeqwD_c8",
-authDomain: "hust-man.firebaseapp.com",
-databaseURL: "https://hust-man-default-rtdb.asia-southeast1.firebasedatabase.app",
-projectId: "hust-man",
-storageBucket: "hust-man.firebasestorage.app",
-messagingSenderId: "1097366065563",
-appId: "1:1097366065563:web:cd629b7a98138506ab113e"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-// lưu lịch sử truy cập
-push(ref(db,"luot_truy_cap"),{
-time: new Date().toLocaleString(),
-device: navigator.userAgent,
-link: window.location.href
-});
-
-// tăng bộ đếm tổng
-const counterRef = ref(db,"tong_truy_cap");
-
-runTransaction(counterRef,(value)=>{
-return (value || 0) + 1;
-});
-
-// hiển thị realtime
-onValue(counterRef,(snap)=>{
-document.getElementById("soNguoi").innerText = snap.val() || 0;
-});
-
-// redirect sau 20s
-setTimeout(()=>{
-window.location.href="https://vn.shp.ee/TuGyf3Ro";
-},20000);
-  
 </script>
 
 </body>
