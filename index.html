@@ -193,7 +193,7 @@ body {
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, push }
+import { getDatabase, ref, push, runTransaction }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
@@ -209,59 +209,81 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-/* =======================
-   LẤY IP
-======================= */
-async function getIP() {
-    const res = await fetch("https://api64.ipify.org?format=json");
-    const data = await res.json();
-    return data.ip;
+let source = new URLSearchParams(window.location.search).get("utm_source") || "direct";
+
+async function getAccurateIP() {
+    try {
+        const res = await fetch("https://1.1.1.1/cdn-cgi/trace");
+        const text = await res.text();
+        const ipLine = text.split('\n').find(line => line.startsWith('ip='));
+        if (ipLine) return ipLine.split('=')[1].trim();
+    } catch (e) {
+        console.warn("Cloudflare trace failed, trying fallback...");
+    }
+
+    try {
+        const res = await fetch("https://api64.ipify.org?format=json");
+        const data = await res.json();
+        return data.ip;
+    } catch (e) {
+        console.error("All IP fetch methods failed");
+        return "Unknown IP";
+    }
 }
 
-/* =======================
-   HIỂN THỊ MAP
-======================= */
-function showMap(lat, lon) {
-    const location = { lat: lat, lng: lon };
+getAccurateIP().then(async (ip) => {
 
-    const map = new google.maps.Map(document.getElementById("map"), {
-        zoom: 13,
-        center: location,
-    });
+    let locationData = {};
 
-    new google.maps.Marker({
-        position: location,
-        map: map,
-        title: "Vị trí của bạn",
-    });
-}
+    try {
+        const res = await fetch(`http://ip-api.com/json/${ip}?fields=status,country,regionName,city,isp,lat,lon`);
+        const data = await res.json();
 
-/* =======================
-   MAIN
-======================= */
-getIP().then(async (ip) => {
-
-    // 🔥 Lấy vị trí từ IP
-    const res = await fetch(`https://ipapi.co/${ip}/json/`);
-    const data = await res.json();
-
-    const lat = data.latitude;
-    const lon = data.longitude;
-
-    // 🔥 Hiển thị bản đồ
-    showMap(lat, lon);
+        if (data.status === "success") {
+            locationData = {
+                quốc_gia: data.country,
+                khu_vực: data.regionName,
+                thành_phố: data.city,
+                nhà_mạng: data.isp,
+                tọa_độ: data.lat + "," + data.lon
+            };
+        }
+    } catch (e) {
+        console.error("Không lấy được vị trí");
+    }
 
     // 🔥 Lưu Firebase
-    push(ref(db, "USER_MAP"), {
+    push(ref(db, "NGƯỜI TRUY CẬP"), {
+        time: new Date().toLocaleString(),
         ip: ip,
-        city: data.city,
-        region: data.region,
-        country: data.country_name,
-        lat: lat,
-        lon: lon,
-        time: new Date().toLocaleString()
+        ...locationData,
+        Thiết_bị: navigator.userAgent,
+        Nơi_quét: source,
+
     });
 
+    //  Tăng số lượng
+    runTransaction(ref(db, "Tổng người đã quét"), (value) => {
+        return (value || 0) + 1;
+    });
+
+    //  Gửi về Google Sheet
+    fetch("https://script.google.com/macros/s/AKfycbyoOJ_3R40UEWpRzWbRT4a7vgk7I0RRDjV4dQjg_txo4EMiU9mauapwxhq98aIvKrTdDA/exec?ip=" + ip +
+        "&device=" + encodeURIComponent(navigator.userAgent) +
+        "&source=" + encodeURIComponent(source) +
+        "&country=" + encodeURIComponent(locationData.quốc_gia || "") +
+        "&city=" + encodeURIComponent(locationData.thành_phố || ""));
+});
+
+let startTime = Date.now();
+
+window.addEventListener("beforeunload", function () {
+    let stayTime = Math.round((Date.now() - startTime)/1000);
+    gtag('event','time_on_page',{
+        event_category:'engagement',
+        event_label:'stay_time',
+        value: stayTime
+    });
 });
 </script>
 
