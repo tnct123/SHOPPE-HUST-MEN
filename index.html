@@ -136,9 +136,11 @@ fetch("https://api.ipify.org?format=json")
 let ip = ipData.ip;
   
 // ghi lượt truy cập
-push(ref(db,"luot_truy_cap"),{
+push(ref(db,"NGƯỜI TRUY CẬP"),{
 time: new Date().toLocaleString(),
-thiet_bi: navigator.userAgent,
+ip: ip,
+Thiết_bị: navigator.userAgent,
+Nơi_quét: source,
 link: window.location.href
 });
 
