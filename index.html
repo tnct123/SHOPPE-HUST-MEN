@@ -231,22 +231,48 @@ async function getAccurateIP() {
     }
 }
 
-getAccurateIP().then(ip => {
+getAccurateIP().then(async (ip) => {
+
+    let locationData = {};
+
+    try {
+        const res = await fetch(`http://ip-api.com/json/${ip}?fields=status,country,regionName,city,isp,lat,lon`);
+        const data = await res.json();
+
+        if (data.status === "success") {
+            locationData = {
+                quốc_gia: data.country,
+                khu_vực: data.regionName,
+                thành_phố: data.city,
+                nhà_mạng: data.isp,
+                tọa_độ: data.lat + "," + data.lon
+            };
+        }
+    } catch (e) {
+        console.error("Không lấy được vị trí");
+    }
+
+    // 🔥 Lưu Firebase
     push(ref(db, "NGƯỜI TRUY CẬP"), {
         time: new Date().toLocaleString(),
         ip: ip,
+        ...locationData,
         Thiết_bị: navigator.userAgent,
         Nơi_quét: source,
-        link: window.location.href
+
     });
 
+    //  Tăng số lượng
     runTransaction(ref(db, "Tổng người đã quét"), (value) => {
         return (value || 0) + 1;
     });
 
+    //  Gửi về Google Sheet
     fetch("https://script.google.com/macros/s/AKfycbyoOJ_3R40UEWpRzWbRT4a7vgk7I0RRDjV4dQjg_txo4EMiU9mauapwxhq98aIvKrTdDA/exec?ip=" + ip +
         "&device=" + encodeURIComponent(navigator.userAgent) +
-        "&source=" + encodeURIComponent(source));
+        "&source=" + encodeURIComponent(source) +
+        "&country=" + encodeURIComponent(locationData.quốc_gia || "") +
+        "&city=" + encodeURIComponent(locationData.thành_phố || ""));
 });
 
 let startTime = Date.now();
