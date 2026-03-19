@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>HUST MEN</title>
+
+<meta property="og:title" content="HUST MEN gửi món quà nho nhỏ tặng bạn đây">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://tnct123.github.io/SHOPPE-HUST-MEN/">
+<meta property="og:image" content="https://tnct123.github.io/SHOPPE-HUST-MEN/logo.png">
+
+<link rel="icon" href="logo.png">
+
+<!-- GOOGLE ANALYTICS -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-12WDG85B8M"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-12WDG85B8M');
+</script>
+
+<style>
+body{
+font-family:'Segoe UI', Arial, sans-serif;
+background: linear-gradient(135deg,#ffcc99,#ffffff);
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+margin:0;
+overflow:hidden;
+}
+
+.container{
+background:white;
+padding:40px;
+border-radius:15px;
+box-shadow:0 10px 25px rgba(0,0,0,0.1);
+text-align:center;
+width:420px;
+max-width:90%;
+}
+
+.logo{
+width:200px;
+margin-bottom:20px;
+display:block;
+margin-left:auto;
+margin-right:auto;
+}
+
+.title{
+font-size:26px;
+font-weight:bold;
+color:#ff9800;
+}
+
+.message{
+font-size:18px;
+color:#444;
+margin-top:10px;
+line-height:1.6;
+}
+
+.progress{
+width:100%;
+height:12px;
+background:#eee;
+border-radius:10px;
+margin-top:25px;
+overflow:hidden;
+}
+
+.progress-bar{
+height:100%;
+width:0%;
+background:#ff9800;
+animation:load 10s linear forwards;
+}
+
+@keyframes load{
+from{width:0%;}
+to{width:100%;}
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+<img src="logo.png" class="logo">
+<div class="title">HUST MEN</div>
+
+<div class="message">
+Hệ thống đang chuẩn bị mã giảm giá cho bạn.<br>
+Vui lòng chờ trong giây lát...
+</div>
+
+<div class="progress">
+<div class="progress-bar"></div>
+</div>
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, push, runTransaction }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyBpThQgsy6FoGMFALL1mMdCDrupeqwD_c8",
+authDomain: "hust-man.firebaseapp.com",
+databaseURL: "https://hust-man-default-rtdb.asia-southeast1.firebasedatabase.app",
+projectId: "hust-man",
+storageBucket: "hust-man.firebasestorage.app",
+messagingSenderId: "1097366065563",
+appId: "1:1097366065563:web:cd629b7a98138506ab113e"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// nguồn truy cập
+let source = new URLSearchParams(window.location.search).get("utm_source") || "direct";
+
+// lấy IP ổn định
+fetch("https://api.ipify.org?format=json")
+.then(res=>res.json())
+.then(ipData=>{
+
+let ip = ipData.ip;
+  
+// ghi lượt truy cập
+push(ref(db,"NGƯỜI TRUY CẬP"),{
+time: new Date().toLocaleString(),
+ip: ip,
+Thiết_bị: navigator.userAgent,
+Nơi_quét: source,
+link: window.location.href
+});
+
+// tăng counter
+runTransaction(ref(db,"Tổng người đã quét"),(value)=>{
+return (value || 0) + 1;
+});
+
+// gửi google sheet
+fetch("https://script.google.com/macros/s/AKfycbyoOJ_3R40UEWpRzWbRT4a7vgk7I0RRDjV4dQjg_txo4EMiU9mauapwxhq98aIvKrTdDA/exec?ip="+ip+
+"&device="+navigator.userAgent+
+"&source="+source);
+
+});
+
+// tracking thời gian ở lại
+let startTime = Date.now();
+
+window.addEventListener("beforeunload", function () {
+
+let stayTime = Math.round((Date.now() - startTime)/1000);
+
+gtag('event','time_on_page',{
+event_category:'engagement',
+event_label:'stay_time',
+value: stayTime
+});
+
+});
+
+</script>
+
+<script>
+
+// redirect sau 10 giây
+setTimeout(()=>{
+
+gtag('event','redirect_shopee',{
+event_category:'link',
+event_label:'user_redirect'
+});
+
+window.location.href="https://vn.shp.ee/TuGyf3Ro";
+
+},10000);
+
+</script>
+
+</body>
+</html>
