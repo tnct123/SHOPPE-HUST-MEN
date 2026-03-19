@@ -14,7 +14,6 @@
 
 <link rel="icon" href="logo.png">
 
-<!-- GOOGLE ANALYTICS -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-12WDG85B8M"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
@@ -128,31 +127,50 @@ const db = getDatabase(app);
 // nguồn truy cập
 let source = new URLSearchParams(window.location.search).get("utm_source") || "direct";
 
-// lấy IP ổn định
-fetch("https://api.ipify.org?format=json")
-.then(res=>res.json())
-.then(ipData=>{
+// Hàm lấy IP với cơ chế dự phòng (fallback) để tăng độ ổn định
+async function getAccurateIP() {
+    try {
+        // Ưu tiên 1: Dùng Cloudflare Trace (Rất hiếm khi bị chặn, hỗ trợ IPv4 & IPv6)
+        const res = await fetch("https://1.1.1.1/cdn-cgi/trace");
+        const text = await res.text();
+        const ipLine = text.split('\n').find(line => line.startsWith('ip='));
+        if (ipLine) return ipLine.split('=')[1].trim();
+    } catch (e) {
+        console.warn("Cloudflare trace failed, trying fallback...");
+    }
 
-let ip = ipData.ip;
-  
-// ghi lượt truy cập
-push(ref(db,"NGƯỜI TRUY CẬP"),{
-time: new Date().toLocaleString(),
-ip: ip,
-Thiết_bị: navigator.userAgent,
-Nơi_quét: source,
-link: window.location.href
-});
+    try {
+        // Ưu tiên 2: Dùng ipify bản api64 (hỗ trợ cả IPv6)
+        const res = await fetch("https://api64.ipify.org?format=json");
+        const data = await res.json();
+        return data.ip;
+    } catch (e) {
+        console.error("All IP fetch methods failed");
+        return "Unknown IP";
+    }
+}
 
-// tăng counter
-runTransaction(ref(db,"Tổng người đã quét"),(value)=>{
-return (value || 0) + 1;
-});
+// Thực thi lấy IP và ghi dữ liệu
+getAccurateIP().then(ip => {
+    
+    // ghi lượt truy cập lên Firebase
+    push(ref(db, "NGƯỜI TRUY CẬP"), {
+        time: new Date().toLocaleString(),
+        ip: ip,
+        Thiết_bị: navigator.userAgent,
+        Nơi_quét: source,
+        link: window.location.href
+    });
 
-// gửi google sheet
-fetch("https://script.google.com/macros/s/AKfycbyoOJ_3R40UEWpRzWbRT4a7vgk7I0RRDjV4dQjg_txo4EMiU9mauapwxhq98aIvKrTdDA/exec?ip="+ip+
-"&device="+navigator.userAgent+
-"&source="+source);
+    // tăng counter
+    runTransaction(ref(db, "Tổng người đã quét"), (value) => {
+        return (value || 0) + 1;
+    });
+
+    // gửi dữ liệu về Google Sheet (đã thêm encodeURIComponent để tránh lỗi URL)
+    fetch("https://script.google.com/macros/s/AKfycbyoOJ_3R40UEWpRzWbRT4a7vgk7I0RRDjV4dQjg_txo4EMiU9mauapwxhq98aIvKrTdDA/exec?ip=" + ip +
+        "&device=" + encodeURIComponent(navigator.userAgent) +
+        "&source=" + encodeURIComponent(source));
 
 });
 
