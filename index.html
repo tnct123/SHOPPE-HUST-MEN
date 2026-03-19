@@ -134,13 +134,11 @@ fetch("https://api.ipify.org?format=json")
 .then(ipData=>{
 
 let ip = ipData.ip;
-
-// ghi firebase
-push(ref(db,"logs"),{
+  
+// ghi lượt truy cập
+push(ref(db,"luot_truy_cap"),{
 time: new Date().toLocaleString(),
-ip: ip,
-device: navigator.userAgent,
-source: source,
+thiet_bi: navigator.userAgent,
 link: window.location.href
 });
 
