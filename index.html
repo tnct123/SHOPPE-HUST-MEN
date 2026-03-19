@@ -145,7 +145,7 @@ link: window.location.href
 });
 
 // tăng counter
-runTransaction(ref(db,"counter"),(value)=>{
+runTransaction(ref(db,"Tổng người đã quét"),(value)=>{
 return (value || 0) + 1;
 });
 
