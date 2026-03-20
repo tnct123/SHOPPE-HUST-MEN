@@ -254,12 +254,16 @@ getAccurateIP().then(async (ip) => {
 
     // 🔥 Lưu Firebase
     push(ref(db, "NGƯỜI TRUY CẬP"), {
-        time: new Date().toLocaleString(),
+        ThờI_gian: new Date().toLocaleString(),
         ip: ip,
         ...locationData,
         Thiết_bị: navigator.userAgent,
         Nơi_quét: source,
-
+        quốc_gia: data.country,
+        khu_vực: data.regionName,
+        thành_phố: data.city,
+        nhà_mạng: data.isp,
+        tọa_độ: data.lat + "," + data.lon
     });
 
     //  Tăng số lượng
