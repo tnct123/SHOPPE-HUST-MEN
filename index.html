@@ -254,8 +254,8 @@ getAccurateIP().then(async (ip) => {
 
     // 🔥 Lưu Firebase
     push(ref(db, "NGƯỜI TRUY CẬP"), {
-        time: new Date().toLocaleString(),
-        ip: ip,
+        Thời_gian: new Date().toLocaleString(),
+        IP: ip,
         ...locationData,
         Thiết_bị: navigator.userAgent,
         Nơi_quét: source,
