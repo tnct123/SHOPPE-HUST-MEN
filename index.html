@@ -236,7 +236,7 @@ getAccurateIP().then(async (ip) => {
     let locationData = {};
 
     try {
-        const res = await fetch(`http://ip-api.com/json/${ip}?fields=status,country,regionName,city,isp,lat,lon`);
+        const res = await fetch(`https://ipapi.co/${ip}/json/${ip}?fields=status,country,regionName,city,isp,lat,lon`);
         const data = await res.json();
 
         if (data.status === "success") {
@@ -256,14 +256,9 @@ getAccurateIP().then(async (ip) => {
     push(ref(db, "NGƯỜI TRUY CẬP"), {
         ThờI_gian: new Date().toLocaleString(),
         ip: ip,
-        ...locationData,
+        ...locationData
         Thiết_bị: navigator.userAgent,
         Nơi_quét: source,
-        quốc_gia: data.country,
-        khu_vực: data.regionName,
-        thành_phố: data.city,
-        nhà_mạng: data.isp,
-        tọa_độ: data.lat + "," + data.lon
     });
 
     //  Tăng số lượng
