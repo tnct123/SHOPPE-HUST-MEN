@@ -236,7 +236,7 @@ getAccurateIP().then(async (ip) => {
     let locationData = {};
 
     try {
-        const res = await fetch(`https://ipapi.co/${ip}/json/${ip}?fields=status,country,regionName,city,isp,lat,lon`);
+        const res = await fetch(`https://ipapi.co/${ip}/json/);
         const data = await res.json();
 
         if (data.status === "success") {
