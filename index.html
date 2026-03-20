@@ -236,7 +236,7 @@ getAccurateIP().then(async (ip) => {
     let locationData = {};
 
     try {
-        const res = await fetch(`https://ipapi.co/${ip}/json/);
+        const res = await fetch(`http://ip-api.com/json/${ip}?fields=status,country,regionName,city,isp,lat,lon`);
         const data = await res.json();
 
         if (data.status === "success") {
@@ -254,11 +254,12 @@ getAccurateIP().then(async (ip) => {
 
     // 🔥 Lưu Firebase
     push(ref(db, "NGƯỜI TRUY CẬP"), {
-        ThờI_gian: new Date().toLocaleString(),
+        time: new Date().toLocaleString(),
         ip: ip,
-        ...locationData
+        ...locationData,
         Thiết_bị: navigator.userAgent,
         Nơi_quét: source,
+
     });
 
     //  Tăng số lượng
