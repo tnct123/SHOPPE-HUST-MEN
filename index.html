@@ -240,28 +240,24 @@ function showMap(lat, lon) {
    MAIN
 ======================= */
 getIP().then(async (ip) => {
+    try {
+        const res = await fetch(`https://ipapi.co/${ip}/json/`);
+        const data = await res.json();
 
-    // 🔥 Lấy vị trí từ IP
-    const res = await fetch(`https://ipapi.co/${ip}/json/`);
-    const data = await res.json();
+        const lat = data.latitude;
+        const lon = data.longitude;
 
-    const lat = data.latitude;
-    const lon = data.longitude;
+        push(ref(db, "USER_MAP"), {
+            ip: ip,
+            Thành_phố: data.city,
+            lat: lat,
+            lon: lon,
+            Thời_gian: new Date().toLocaleString()
+        });
 
-    // 🔥 Hiển thị bản đồ
-    showMap(lat, lon);
-
-    // 🔥 Lưu Firebase
-    push(ref(db, "USER_MAP"), {
-        ip: ip,
-        city: data.city,
-        region: data.region,
-        country: data.country_name,
-        lat: lat,
-        lon: lon,
-        time: new Date().toLocaleString()
-    });
-
+    } catch (err) {
+        console.error("Lỗi fetch API:", err);
+    }
 });
 </script>
 
